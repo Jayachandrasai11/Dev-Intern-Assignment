@@ -1,0 +1,4 @@
+/* Atlas Web ships no bundled webfont. The brand typeface resolves to Geist
+   when the platform provides it, falling back to the system sans stack
+   (see the `fontFamily` in tokens/presets.ts). font-display concerns do not
+   apply without an @font-face src. */

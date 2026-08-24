@@ -1,0 +1,341 @@
+/* Component CSS consumption contract (enforced by css-contract.test.ts):
+   colors come ONLY from component tokens (--ev-<component>-*) or semantic
+   roles (--ev-status-*, --ev-color-*); never from raw scales (--ev-gray-N,
+   --ev-accent-N, …). Structural values (spacing, weights, line-heights,
+   motion, z) may consume global primitives directly. */
+
+/* ============ Status color plumbing ============
+   Each status modifier sets private vars from the SEMANTIC status roles;
+   every status-aware component (badge, chip, pin, …) consumes them. */
+.ev-status--available  { --_status: var(--ev-status-available);  --_status-bg: var(--ev-status-available-bg);  --_status-text: var(--ev-status-available-text);  --_status-contrast: var(--ev-status-available-contrast); }
+.ev-status--charging   { --_status: var(--ev-status-charging);   --_status-bg: var(--ev-status-charging-bg);   --_status-text: var(--ev-status-charging-text);   --_status-contrast: var(--ev-status-charging-contrast); }
+.ev-status--in-use     { --_status: var(--ev-status-in-use);     --_status-bg: var(--ev-status-in-use-bg);     --_status-text: var(--ev-status-in-use-text);     --_status-contrast: var(--ev-status-in-use-contrast); }
+.ev-status--occupied   { --_status: var(--ev-status-occupied);   --_status-bg: var(--ev-status-occupied-bg);   --_status-text: var(--ev-status-occupied-text);   --_status-contrast: var(--ev-status-occupied-contrast); }
+.ev-status--faulted    { --_status: var(--ev-status-faulted);    --_status-bg: var(--ev-status-faulted-bg);    --_status-text: var(--ev-status-faulted-text);    --_status-contrast: var(--ev-status-faulted-contrast); }
+.ev-status--offline    { --_status: var(--ev-status-offline);    --_status-bg: var(--ev-status-offline-bg);    --_status-text: var(--ev-status-offline-text);    --_status-contrast: var(--ev-status-offline-contrast); }
+.ev-status--coming-soon { --_status: var(--ev-status-coming-soon); --_status-bg: var(--ev-status-coming-soon-bg); --_status-text: var(--ev-status-coming-soon-text); --_status-contrast: var(--ev-status-coming-soon-contrast); }
+.ev-status--maintenance { --_status: var(--ev-status-maintenance); --_status-bg: var(--ev-status-maintenance-bg); --_status-text: var(--ev-status-maintenance-text); --_status-contrast: var(--ev-status-maintenance-contrast); }
+.ev-status--unknown    { --_status: var(--ev-status-unknown);    --_status-bg: var(--ev-status-unknown-bg);    --_status-text: var(--ev-status-unknown-text);    --_status-contrast: var(--ev-status-unknown-contrast); }
+
+/* ============ Button ============ */
+.ev-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(6px * var(--ev-scaling));
+  border: none;
+  /* radius-full is the pill opt-in flag: 9999px only for the "full" brand
+     radius setting, 0px otherwise (max() then defers to the normal radius) */
+  border-radius: max(var(--ev-button-radius), var(--ev-radius-full));
+  font-family: var(--ev-font-family);
+  font-weight: var(--ev-font-weight-medium);
+  cursor: pointer;
+  transition:
+    background var(--ev-button-transition-duration) var(--ev-button-transition-easing),
+    box-shadow var(--ev-button-transition-duration) var(--ev-button-transition-easing);
+  background: transparent;
+}
+.ev-button:focus-visible {
+  outline: 2px solid var(--ev-color-focus-ring);
+  outline-offset: 2px;
+}
+.ev-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.ev-button--sm { height: var(--ev-button-height-sm); padding: 0 var(--ev-button-px-sm); font-size: var(--ev-button-font-sm); }
+.ev-button--md { height: var(--ev-button-height-md); padding: 0 var(--ev-button-px-md); font-size: var(--ev-button-font-md); }
+.ev-button--lg { height: var(--ev-button-height-lg); padding: 0 var(--ev-button-px-lg); font-size: var(--ev-button-font-lg); }
+
+.ev-button--solid { background: var(--ev-button-solid-bg); color: var(--ev-button-solid-text); }
+.ev-button--solid:hover:not(:disabled) { background: var(--ev-button-solid-bg-hover); }
+.ev-button--soft { background: var(--ev-button-soft-bg); color: var(--ev-button-soft-text); }
+.ev-button--soft:hover:not(:disabled) { background: var(--ev-button-soft-bg-hover); }
+.ev-button--outline { box-shadow: inset 0 0 0 1px var(--ev-button-outline-border); color: var(--ev-button-outline-text); }
+.ev-button--outline:hover:not(:disabled) { background: var(--ev-button-outline-bg-hover); }
+.ev-button--ghost { color: var(--ev-button-ghost-text); }
+.ev-button--ghost:hover:not(:disabled) { background: var(--ev-button-ghost-bg-hover); }
+
+/* ============ Status badge / dot ============ */
+.ev-status-dot {
+  display: inline-block;
+  width: var(--ev-badge-dot-size);
+  height: var(--ev-badge-dot-size);
+  border-radius: 9999px;
+  background: var(--_status, var(--ev-status-offline));
+  flex: none;
+}
+.ev-status--charging > .ev-status-dot,
+.ev-status-dot.ev-status--charging {
+  animation: ev-pulse var(--ev-badge-pulse-duration) var(--ev-easing-standard) infinite;
+}
+@keyframes ev-pulse {
+  50% { opacity: 0.45; }
+}
+.ev-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(6px * var(--ev-scaling));
+  padding: calc(2px * var(--ev-scaling)) calc(8px * var(--ev-scaling));
+  border-radius: max(var(--ev-badge-radius), var(--ev-radius-full));
+  background: var(--_status-bg);
+  color: var(--_status-text);
+  font-family: var(--ev-font-family);
+  font-size: var(--ev-badge-font);
+  font-weight: var(--ev-font-weight-medium);
+  line-height: var(--ev-line-height-1);
+  white-space: nowrap;
+}
+.ev-status-badge strong { font-weight: var(--ev-font-weight-bold); }
+
+/* ============ Tag ============ */
+.ev-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(4px * var(--ev-scaling));
+  padding: calc(2px * var(--ev-scaling)) calc(8px * var(--ev-scaling));
+  border-radius: max(var(--ev-tag-radius), var(--ev-radius-full));
+  font-family: var(--ev-font-family);
+  font-size: var(--ev-tag-font);
+  font-weight: var(--ev-font-weight-medium);
+  line-height: var(--ev-line-height-1);
+}
+.ev-tag--neutral { background: var(--ev-tag-neutral-bg); color: var(--ev-tag-neutral-text); }
+.ev-tag--accent { background: var(--ev-tag-accent-bg); color: var(--ev-tag-accent-text); }
+.ev-tag svg { width: calc(12px * var(--ev-scaling)); }
+
+/* ============ Icon (Hugeicons) ============ */
+.ev-icon { display: inline-flex; color: var(--ev-color-text); flex: none; }
+.ev-icon svg { width: 100%; height: 100%; }
+
+/* ============ Connector icon ============ */
+.ev-connector-icon { color: var(--ev-connector-color); }
+.ev-connector-icon--muted { color: var(--ev-connector-muted-color); }
+
+/* ============ Power text ============ */
+.ev-power-text {
+  display: inline-flex;
+  align-items: baseline;
+  gap: calc(4px * var(--ev-scaling));
+  font-family: var(--ev-font-family);
+  font-size: var(--ev-power-font);
+  color: var(--ev-power-unit-color);
+}
+.ev-power-text__bolts {
+  display: inline-flex;
+  align-self: center;
+  color: var(--ev-power-bolt-color);
+}
+.ev-power-text__bolts svg {
+  width: calc(11px * var(--ev-scaling));
+  margin-right: calc(-3px * var(--ev-scaling));
+}
+.ev-power-text__value { font-weight: var(--ev-font-weight-medium); color: var(--ev-power-value-color); }
+.ev-power-text__unit { color: var(--ev-power-unit-color); font-weight: var(--ev-font-weight-regular); }
+.ev-power-text--emphasis .ev-power-text__value { font-size: var(--ev-font-size-7); font-weight: var(--ev-font-weight-bold); }
+
+/* ============ Price text ============ */
+.ev-price-text {
+  font-family: var(--ev-font-family);
+  font-size: var(--ev-price-font);
+  font-weight: var(--ev-font-weight-medium);
+  color: var(--ev-price-color);
+}
+.ev-price-text__unit { color: var(--ev-price-unit-color); font-weight: var(--ev-font-weight-regular); }
+.ev-price-text--free { color: var(--ev-price-free-color); }
+.ev-price-text--emphasis { font-size: var(--ev-font-size-6); font-weight: var(--ev-font-weight-bold); }
+
+/* ============ Battery glyph ============ */
+.ev-battery--ok { color: var(--ev-battery-ok-color); }
+.ev-battery--low { color: var(--ev-battery-low-color); }
+.ev-battery--charging { color: var(--ev-battery-charging-color); }
+.ev-battery__shell { color: var(--ev-battery-shell-color); }
+.ev-battery__nub { color: var(--ev-battery-shell-color); }
+.ev-battery__fill { fill: currentColor; }
+.ev-battery__bolt { fill: var(--ev-color-bg); stroke: currentColor; stroke-width: 0.75; }
+
+/* ============ Input ============ */
+.ev-input {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(6px * var(--ev-scaling));
+  height: var(--ev-input-height);
+  padding: 0 calc(10px * var(--ev-scaling));
+  border-radius: var(--ev-input-radius);
+  background: var(--ev-input-bg);
+  box-shadow: inset 0 0 0 1px var(--ev-input-border);
+  color: var(--ev-color-text-secondary);
+  transition: box-shadow var(--ev-input-transition-duration) var(--ev-input-transition-easing);
+  min-width: calc(180px * var(--ev-scaling));
+}
+.ev-input:focus-within {
+  box-shadow:
+    inset 0 0 0 1px var(--ev-input-border-focus),
+    0 0 0 3px var(--ev-input-ring-focus);
+}
+.ev-input--error { box-shadow: inset 0 0 0 1px var(--ev-input-error-border); }
+.ev-input--error:focus-within {
+  box-shadow:
+    inset 0 0 0 1px var(--ev-input-error-border),
+    0 0 0 3px var(--ev-input-error-ring);
+}
+.ev-input__icon { width: calc(15px * var(--ev-scaling)); flex: none; }
+.ev-input input {
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  font-family: var(--ev-font-family);
+  font-size: var(--ev-input-font);
+  color: var(--ev-input-text);
+}
+.ev-input input::placeholder { color: var(--ev-input-placeholder); }
+
+/* ============ Switch ============ */
+.ev-switch {
+  all: unset;
+  display: inline-flex;
+  width: var(--ev-switch-width);
+  height: var(--ev-switch-height);
+  padding: calc(2px * var(--ev-scaling));
+  border-radius: 9999px; /* switches stay pill-shaped at every brand radius */
+  background: var(--ev-switch-track-bg);
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: background var(--ev-switch-transition-duration) var(--ev-switch-transition-easing);
+}
+.ev-switch:focus-visible { outline: 2px solid var(--ev-color-focus-ring); outline-offset: 2px; }
+.ev-switch[data-state='checked'] { background: var(--ev-switch-track-bg-checked); }
+.ev-switch__thumb {
+  display: block;
+  width: var(--ev-switch-thumb-size);
+  height: var(--ev-switch-thumb-size);
+  border-radius: 9999px;
+  background: var(--ev-switch-thumb-bg);
+  box-shadow: var(--ev-shadow-1);
+  transition: transform var(--ev-switch-transition-duration) var(--ev-switch-transition-easing);
+}
+.ev-switch__thumb[data-state='checked'] {
+  transform: translateX(calc(var(--ev-switch-width) - var(--ev-switch-height)));
+}
+
+/* ============ Freshness indicator ============ */
+.ev-freshness {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(4px * var(--ev-scaling));
+  font-family: var(--ev-font-family);
+  font-size: var(--ev-freshness-font);
+  line-height: var(--ev-line-height-1);
+}
+.ev-freshness--fresh { color: var(--ev-freshness-fresh-color); }
+.ev-freshness--stale { color: var(--ev-freshness-stale-color); }
+.ev-freshness--unknown { color: var(--ev-freshness-unknown-color); }
+.ev-freshness__icon { width: calc(12px * var(--ev-scaling)); flex: none; }
+
+/* ============ Skeleton ============ */
+.ev-skeleton {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  background: var(--ev-skeleton-base);
+  border-radius: var(--ev-skeleton-radius);
+}
+.ev-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, var(--ev-skeleton-highlight), transparent);
+  animation: ev-shimmer var(--ev-skeleton-shimmer-duration) var(--ev-easing-standard) infinite;
+}
+@keyframes ev-shimmer {
+  to { transform: translateX(100%); }
+}
+.ev-skeleton--text { width: calc(160px * var(--ev-scaling)); height: calc(12px * var(--ev-scaling)); }
+.ev-skeleton--title { width: calc(220px * var(--ev-scaling)); height: calc(18px * var(--ev-scaling)); }
+.ev-skeleton--row { display: block; width: 100%; height: calc(52px * var(--ev-scaling)); border-radius: var(--ev-list-row-radius); }
+.ev-skeleton--card { display: block; width: 100%; height: calc(96px * var(--ev-scaling)); border-radius: var(--ev-card-radius); }
+.ev-skeleton--circle { width: calc(36px * var(--ev-scaling)); height: calc(36px * var(--ev-scaling)); border-radius: 9999px; }
+
+/* ============ Payment status tag ============ */
+.ev-payment-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(6px * var(--ev-scaling));
+  padding: calc(2px * var(--ev-scaling)) calc(8px * var(--ev-scaling));
+  border-radius: max(var(--ev-tag-radius), var(--ev-radius-full));
+  background: var(--_status-bg);
+  color: var(--_status-text);
+  font-family: var(--ev-font-family);
+  font-size: var(--ev-tag-font);
+  font-weight: var(--ev-font-weight-medium);
+  line-height: var(--ev-line-height-1);
+  white-space: nowrap;
+}
+.ev-payment-tag::before {
+  content: '';
+  width: calc(6px * var(--ev-scaling));
+  height: calc(6px * var(--ev-scaling));
+  border-radius: 9999px;
+  background: var(--_status);
+}
+
+/* ============ Code input ============ */
+.ev-code-input {
+  display: inline-flex;
+  gap: calc(8px * var(--ev-scaling));
+  position: relative;
+  cursor: text;
+}
+.ev-code-input__field {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  border: none;
+  outline: none;
+  caret-color: transparent;
+  font-size: var(--ev-code-input-font); /* prevents iOS focus zoom */
+}
+.ev-code-input__cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ev-code-input-cell-width);
+  height: var(--ev-code-input-cell-height);
+  border-radius: var(--ev-code-input-radius);
+  background: var(--ev-input-bg);
+  box-shadow: inset 0 0 0 1px var(--ev-input-border);
+  color: var(--ev-input-text);
+  font-family: var(--ev-font-family);
+  font-size: var(--ev-code-input-font);
+  font-weight: var(--ev-font-weight-bold);
+  transition: box-shadow var(--ev-input-transition-duration) var(--ev-input-transition-easing);
+}
+.ev-code-input__cell--active {
+  box-shadow:
+    inset 0 0 0 1px var(--ev-input-border-focus),
+    0 0 0 3px var(--ev-input-ring-focus);
+}
+.ev-code-input--error .ev-code-input__cell { box-shadow: inset 0 0 0 1px var(--ev-input-error-border); }
+.ev-code-input--error .ev-code-input__cell--active {
+  box-shadow:
+    inset 0 0 0 1px var(--ev-input-error-border),
+    0 0 0 3px var(--ev-input-error-ring);
+}
+.ev-code-input--disabled { cursor: not-allowed; opacity: 0.55; }
+
+/* ============ Spinner ============ */
+.ev-spinner {
+  display: inline-block;
+  border-radius: 9999px;
+  border: 2px solid var(--ev-spinner-track-color);
+  border-top-color: currentColor;
+  animation: ev-spin var(--ev-spinner-spin-duration) linear infinite;
+}
+.ev-spinner--sm { width: calc(12px * var(--ev-scaling)); height: calc(12px * var(--ev-scaling)); }
+.ev-spinner--md { width: calc(18px * var(--ev-scaling)); height: calc(18px * var(--ev-scaling)); }
+.ev-spinner--lg { width: calc(28px * var(--ev-scaling)); height: calc(28px * var(--ev-scaling)); }
+@keyframes ev-spin {
+  to { transform: rotate(360deg); }
+}

@@ -1,0 +1,3 @@
+{
+  "rewrites": [{ "source": "/composer", "destination": "/composer.html" }]
+}

@@ -1,0 +1,67 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  font-family: var(--ev-font-family, system-ui, sans-serif);
+  background: var(--ev-color-bg, #fff);
+  color: var(--ev-color-text, #111);
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* ---------- UI library switcher + pack loading (shared shell chrome) ---------- */
+.lib-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(8px * var(--ev-scaling));
+}
+.lib-switcher__label {
+  font-size: var(--ev-text-caption);
+  color: var(--ev-color-text-secondary);
+  white-space: nowrap;
+}
+.lib-switcher__select {
+  appearance: none;
+  padding: calc(6px * var(--ev-scaling)) calc(28px * var(--ev-scaling))
+    calc(6px * var(--ev-scaling)) calc(10px * var(--ev-scaling));
+  border: 1px solid var(--ev-color-border);
+  border-radius: calc(var(--ev-radius-interactive) * var(--ev-radius-factor));
+  background: var(--ev-color-panel)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")
+    no-repeat right calc(6px * var(--ev-scaling)) center / 16px;
+  color: var(--ev-color-text);
+  font-weight: 600;
+  cursor: pointer;
+}
+.lib-switcher__select:focus-visible {
+  outline: 2px solid var(--ev-color-focus-ring);
+  outline-offset: 1px;
+}
+.lib-loading {
+  min-height: 100vh;
+}

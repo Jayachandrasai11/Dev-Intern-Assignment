@@ -1,0 +1,394 @@
+/* Atlas Web molecules — atlas- BEM classes. Same contract as atoms.css: every
+   color comes from emitted tokens — component (--ev-spec-card-*, --ev-navtabs-*,
+   …), shared surfaces (--ev-card-*, --ev-ink-*, --ev-surface-subtle) and
+   semantic roles (--ev-color-*, --_status-* plumbing) — geometry is scaled by
+   --ev-scaling. Never raw hex, never raw ramp steps. */
+
+/* ---------- SpecCard ---------- */
+.atlas-speccard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(10px * var(--ev-scaling));
+  padding: var(--ev-card-padding);
+  background: var(--ev-card-bg);
+  border: 1px solid var(--ev-card-border);
+  border-radius: var(--ev-card-radius);
+  font-family: var(--ev-font-family);
+  min-width: calc(180px * var(--ev-scaling));
+  box-sizing: border-box;
+}
+.atlas-speccard__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(36px * var(--ev-scaling));
+  height: calc(36px * var(--ev-scaling));
+  border-radius: 50%;
+  background: var(--ev-spec-card-icon-bg);
+  color: var(--ev-spec-card-accent);
+}
+.atlas-speccard__stat {
+  display: flex;
+  align-items: baseline;
+  gap: calc(4px * var(--ev-scaling));
+}
+.atlas-speccard__value {
+  font-size: calc(32px * var(--ev-scaling));
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--ev-ink-primary);
+}
+.atlas-speccard__unit {
+  font-size: calc(15px * var(--ev-scaling));
+  font-weight: 500;
+  color: var(--ev-ink-secondary);
+}
+.atlas-speccard__label {
+  font-size: calc(13px * var(--ev-scaling));
+  color: var(--ev-ink-secondary);
+}
+
+/* ---------- AdvantageCard ---------- */
+.atlas-advantage {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(12px * var(--ev-scaling));
+  padding: var(--ev-card-padding);
+  background: var(--ev-card-bg);
+  border: 1px solid var(--ev-card-border);
+  border-radius: var(--ev-card-radius);
+  font-family: var(--ev-font-family);
+  max-width: calc(320px * var(--ev-scaling));
+  box-sizing: border-box;
+}
+.atlas-advantage__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(44px * var(--ev-scaling));
+  height: calc(44px * var(--ev-scaling));
+  border-radius: var(--ev-radius-3);
+  background: var(--ev-advantage-card-icon-bg);
+  color: var(--ev-advantage-card-icon);
+}
+.atlas-advantage__title {
+  margin: 0;
+  font-size: calc(18px * var(--ev-scaling));
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--ev-ink-primary);
+}
+.atlas-advantage__body {
+  margin: 0;
+  font-size: calc(14px * var(--ev-scaling));
+  line-height: 1.55;
+  color: var(--ev-ink-secondary);
+}
+
+/* ---------- AccordionItem ---------- */
+.atlas-accordion {
+  border-bottom: 1px solid var(--ev-accordion-border);
+  font-family: var(--ev-font-family);
+}
+.atlas-accordion__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(16px * var(--ev-scaling));
+  width: 100%;
+  padding: calc(18px * var(--ev-scaling)) 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--ev-font-family);
+  color: var(--ev-ink-primary);
+}
+.atlas-accordion__trigger:focus-visible {
+  outline: 2px solid var(--ev-color-focus-ring);
+  outline-offset: 2px;
+}
+.atlas-accordion__question {
+  font-size: calc(17px * var(--ev-scaling));
+  font-weight: 500;
+  line-height: 1.4;
+}
+.atlas-accordion__chevron {
+  color: var(--ev-ink-secondary);
+  transition: transform 200ms ease;
+}
+.atlas-accordion--open .atlas-accordion__chevron { transform: rotate(180deg); }
+.atlas-accordion__answer {
+  padding: 0 0 calc(18px * var(--ev-scaling));
+  max-width: 64ch;
+  font-size: calc(15px * var(--ev-scaling));
+  line-height: 1.55;
+  color: var(--ev-ink-secondary);
+}
+
+/* ---------- NavTabs ---------- */
+.atlas-navtabs {
+  display: flex;
+  gap: calc(4px * var(--ev-scaling));
+  border-bottom: 1px solid var(--ev-navtabs-border);
+  font-family: var(--ev-font-family);
+  overflow-x: auto;
+}
+.atlas-navtabs__tab {
+  position: relative;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: calc(12px * var(--ev-scaling)) calc(16px * var(--ev-scaling));
+  font-family: var(--ev-font-family);
+  font-size: calc(15px * var(--ev-scaling));
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--ev-navtabs-text);
+  transition: color 120ms ease;
+}
+.atlas-navtabs__tab:hover { color: var(--ev-navtabs-text-active); }
+.atlas-navtabs__tab:focus-visible {
+  outline: 2px solid var(--ev-color-focus-ring);
+  outline-offset: -2px;
+}
+.atlas-navtabs__tab--active {
+  color: var(--ev-navtabs-text-active);
+  font-weight: 600;
+}
+.atlas-navtabs__tab--active::after {
+  content: '';
+  position: absolute;
+  left: calc(16px * var(--ev-scaling));
+  right: calc(16px * var(--ev-scaling));
+  bottom: -1px;
+  height: calc(2px * var(--ev-scaling));
+  border-radius: 999px;
+  background: var(--ev-navtabs-underline);
+}
+
+/* ---------- DealerCard ---------- */
+.atlas-dealercard {
+  display: flex;
+  flex-direction: column;
+  gap: calc(10px * var(--ev-scaling));
+  padding: var(--ev-card-padding);
+  background: var(--ev-card-bg);
+  border: 1px solid var(--ev-card-border);
+  border-radius: var(--ev-card-radius);
+  font-family: var(--ev-font-family);
+  min-width: calc(280px * var(--ev-scaling));
+  max-width: calc(380px * var(--ev-scaling));
+  box-sizing: border-box;
+}
+.atlas-dealercard__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: calc(12px * var(--ev-scaling));
+}
+.atlas-dealercard__name {
+  font-size: calc(17px * var(--ev-scaling));
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ev-ink-primary);
+}
+.atlas-dealercard__address {
+  margin: 0;
+  font-size: calc(14px * var(--ev-scaling));
+  line-height: 1.5;
+  color: var(--ev-ink-secondary);
+}
+.atlas-dealercard__meta {
+  display: flex;
+  align-items: center;
+  gap: calc(6px * var(--ev-scaling));
+  font-size: calc(13px * var(--ev-scaling));
+  color: var(--ev-ink-secondary);
+}
+.atlas-dealercard__pin {
+  display: inline-flex;
+  color: var(--ev-dealer-card-accent);
+}
+.atlas-dealercard__distance { font-weight: 500; }
+.atlas-dealercard__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(12px * var(--ev-scaling));
+  margin-top: calc(4px * var(--ev-scaling));
+}
+.atlas-dealercard__call {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(6px * var(--ev-scaling));
+}
+
+/* ---------- Breadcrumb ---------- */
+.atlas-breadcrumb { font-family: var(--ev-font-family); }
+.atlas-breadcrumb__list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: calc(6px * var(--ev-scaling));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.atlas-breadcrumb__item {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(6px * var(--ev-scaling));
+  font-size: calc(13px * var(--ev-scaling));
+}
+.atlas-breadcrumb__link {
+  color: var(--ev-ink-secondary);
+  text-decoration: none;
+  transition: color 120ms ease;
+}
+.atlas-breadcrumb__link:hover {
+  color: var(--ev-link-brand);
+  text-decoration: underline;
+}
+.atlas-breadcrumb__link:focus-visible {
+  outline: 2px solid var(--ev-color-focus-ring);
+  outline-offset: 2px;
+}
+.atlas-breadcrumb__current {
+  color: var(--ev-ink-primary);
+  font-weight: 500;
+}
+.atlas-breadcrumb__sep {
+  display: inline-flex;
+  color: var(--ev-ink-secondary);
+  opacity: 0.7;
+}
+
+/* ---------- NotificationBanner ---------- */
+.atlas-banner {
+  display: flex;
+  align-items: center;
+  gap: calc(10px * var(--ev-scaling));
+  width: 100%;
+  padding: calc(10px * var(--ev-scaling)) calc(16px * var(--ev-scaling));
+  border-radius: var(--ev-radius-2);
+  background: var(--_status-bg);
+  color: var(--_status-text);
+  font-family: var(--ev-font-family);
+  font-size: calc(14px * var(--ev-scaling));
+  box-sizing: border-box;
+}
+.atlas-banner__icon { display: inline-flex; flex-shrink: 0; }
+.atlas-banner__message { flex: 1; line-height: 1.5; }
+.atlas-banner__message strong { font-weight: 600; }
+.atlas-banner__dismiss {
+  display: inline-flex;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  padding: calc(4px * var(--ev-scaling));
+  border-radius: var(--ev-radius-1);
+  opacity: 0.75;
+  transition: opacity 120ms ease;
+}
+.atlas-banner__dismiss:hover { opacity: 1; }
+.atlas-banner__dismiss:focus-visible {
+  outline: 2px solid var(--ev-color-focus-ring);
+  outline-offset: 1px;
+}
+
+/* ---------- AwardCard ---------- */
+.atlas-awardcard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(10px * var(--ev-scaling));
+  padding: var(--ev-card-padding);
+  background: var(--ev-surface-subtle);
+  border-radius: var(--ev-card-radius);
+  font-family: var(--ev-font-family);
+  min-width: calc(200px * var(--ev-scaling));
+  box-sizing: border-box;
+}
+.atlas-awardcard__icon {
+  display: inline-flex;
+  color: var(--ev-award-card-accent);
+}
+.atlas-awardcard__title {
+  font-size: calc(18px * var(--ev-scaling));
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--ev-ink-primary);
+}
+.atlas-awardcard__meta {
+  font-size: calc(13px * var(--ev-scaling));
+  color: var(--ev-ink-secondary);
+}
+
+/* ---------- PriceTag ---------- */
+.atlas-pricetag {
+  display: flex;
+  flex-direction: column;
+  gap: calc(4px * var(--ev-scaling));
+  font-family: var(--ev-font-family);
+}
+.atlas-pricetag__row {
+  display: flex;
+  align-items: baseline;
+  gap: calc(10px * var(--ev-scaling));
+}
+.atlas-pricetag__price {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ev-ink-primary);
+}
+.atlas-pricetag--m .atlas-pricetag__price { font-size: calc(24px * var(--ev-scaling)); line-height: 1.2; }
+.atlas-pricetag--l .atlas-pricetag__price { font-size: calc(36px * var(--ev-scaling)); line-height: 1.1; }
+.atlas-pricetag__compare {
+  color: var(--ev-price-tag-compare);
+  text-decoration: line-through;
+}
+.atlas-pricetag--m .atlas-pricetag__compare { font-size: calc(15px * var(--ev-scaling)); }
+.atlas-pricetag--l .atlas-pricetag__compare { font-size: calc(18px * var(--ev-scaling)); }
+.atlas-pricetag__emi {
+  font-size: calc(13px * var(--ev-scaling));
+  font-weight: 500;
+  color: var(--ev-price-tag-emi);
+}
+
+/* ---------- EmiRow ---------- */
+.atlas-emirow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: calc(16px * var(--ev-scaling));
+  width: 100%;
+  padding: calc(10px * var(--ev-scaling)) 0;
+  border-bottom: 1px solid var(--ev-emi-row-border);
+  font-family: var(--ev-font-family);
+  box-sizing: border-box;
+}
+.atlas-emirow__label {
+  font-size: calc(14px * var(--ev-scaling));
+  color: var(--ev-ink-secondary);
+}
+.atlas-emirow__value {
+  font-size: calc(15px * var(--ev-scaling));
+  font-weight: 600;
+  color: var(--ev-ink-primary);
+  font-variant-numeric: tabular-nums;
+}
+.atlas-emirow--highlight .atlas-emirow__label {
+  color: var(--ev-ink-primary);
+  font-weight: 500;
+}
+.atlas-emirow--highlight .atlas-emirow__value {
+  font-size: calc(17px * var(--ev-scaling));
+  color: var(--ev-emi-row-highlight);
+}
