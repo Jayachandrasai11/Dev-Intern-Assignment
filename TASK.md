@@ -69,7 +69,7 @@ curl -X POST "$GRADER_URL/submissions" \
 ```
 
 Grader_URL : https://checkout-grader-production.up.railway.app/ 
-Use only the invitation-provided grader URL. Send the pull request URL, not the
+Send the pull request URL, not the
 branch or repository URL. A successful submission returns HTTP `202` with a
 receipt. If you spot a mistake later, push the fix to the same pull request and
 submit it again; the newest submission replaces the previous one.
