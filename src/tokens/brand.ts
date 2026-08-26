@@ -8,8 +8,9 @@ import {
 } from '@radix-ui/colors';
 import { generateRadixColors } from './radixColors';
 import type { TokenDef, TokenLayerDef } from './types';
+import type { GrayTint } from './radixColors';
 
-export type GrayTint = 'gray' | 'mauve' | 'slate' | 'sage' | 'olive' | 'sand';
+export type { GrayTint };
 export type RadiusChoice = 'none' | 'small' | 'medium' | 'large' | 'full';
 export type ScalingChoice = 0.9 | 0.95 | 1 | 1.05 | 1.1;
 
@@ -84,12 +85,14 @@ export function buildSemanticTokens(
     accent: accentHex,
     gray: graySeed,
     background: LIGHT_BG,
+    grayTint: brand.grayTint,
   });
   const dark = generateRadixColors({
     appearance: 'dark',
     accent: darkAccentHex,
     gray: graySeed,
     background: DARK_BG,
+    grayTint: brand.grayTint,
   });
 
   const tokens: TokenDef[] = [];
