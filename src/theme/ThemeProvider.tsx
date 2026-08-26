@@ -86,7 +86,9 @@ export function ThemeProvider({
 
   const semantic = useMemo(() => buildSemantic(brand), [buildSemantic, brand]);
   const layers = useMemo(
-    () => [semantic, globalTokens, ...extraLayers],
+    // Global first so brand-generated semantic grays win their collisions
+    // (same precedence as the DTCG/CSS-contract layer stacks).
+    () => [globalTokens, semantic, ...extraLayers],
     [globalTokens, semantic, extraLayers],
   );
   const emitted = useMemo(

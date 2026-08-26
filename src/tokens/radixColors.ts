@@ -15,6 +15,8 @@ const RadixColors = RadixColorsModule as unknown as Record<
 
 export type ArrayOf12<T> = [T, T, T, T, T, T, T, T, T, T, T, T];
 
+export type GrayTint = "gray" | "mauve" | "slate" | "sage" | "olive" | "sand";
+
 export const grayScaleNames = [
   "gray",
   "mauve",
@@ -93,23 +95,32 @@ const darkGrayColors = Object.fromEntries(
 
 export const generateRadixColors = ({
   appearance,
+  grayTint,
   ...args
 }: {
   appearance: "light" | "dark";
   accent: string;
   gray: string;
   background: string;
+  grayTint?: GrayTint;
 }) => {
   const allScales = appearance === "light" ? lightColors : darkColors;
   const grayScales = appearance === "light" ? lightGrayColors : darkGrayColors;
   const backgroundColor = new Color(args.background).to("oklch");
 
-  const grayBaseColor = new Color(args.gray).to("oklch");
-  const grayScaleColors = getScaleFromColor(
-    grayBaseColor,
-    grayScales,
-    backgroundColor
-  );
+  let grayScaleColors: ArrayOf12<Color>;
+
+  if (grayTint !== undefined) {
+    const selectedGrayScale = grayScales[grayTint];
+    grayScaleColors = selectedGrayScale.map((c) => c.clone()) as ArrayOf12<Color>;
+  } else {
+    const grayBaseColor = new Color(args.gray).to("oklch");
+    grayScaleColors = getScaleFromColor(
+      grayBaseColor,
+      grayScales,
+      backgroundColor
+    );
+  }
 
   const accentBaseColor = new Color(args.accent).to("oklch");
 
