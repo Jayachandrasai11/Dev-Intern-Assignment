@@ -167,11 +167,14 @@ export function puckDataToJsx(
     const hit = names.filter((n) => used.has(n)).sort();
     if (hit.length) imports.push(`import { ${hit.join(', ')} } from '${source}';`);
   }
-  const fixtureNames = [...ctx.fixtures].sort();
-  if (fixtureNames.length) {
-    imports.push(
-      `import { ${fixtureNames.join(', ')} } from '${pack.fixtures[fixtureNames[0]]}';`,
-    );
+  const fixtureGroups: Record<string, string[]> = {};
+  for (const name of [...ctx.fixtures].sort()) {
+    const source = pack.fixtures[name];
+    if (!fixtureGroups[source]) fixtureGroups[source] = [];
+    fixtureGroups[source].push(name);
+  }
+  for (const [source, names] of Object.entries(fixtureGroups)) {
+    imports.push(`import { ${names.sort().join(', ')} } from '${source}';`);
   }
 
   const body =

@@ -30,7 +30,7 @@ interface PersistedState {
   appearance: Appearance;
 }
 
-function loadPersisted(
+export function loadPersisted(
   storageKey: string,
   legacyStorageKeys: string[],
   defaultPreset: BrandDefinition,
@@ -83,6 +83,16 @@ export function ThemeProvider({
   const [appearance, setAppearance] = useState<Appearance>(
     persisted.appearance,
   );
+
+  useEffect(() => {
+    const newPersisted = loadPersisted(
+      storageKey,
+      legacyStorageKeys,
+      defaultPreset,
+    );
+    setBrand(newPersisted.brand);
+    setAppearance(newPersisted.appearance);
+  }, [storageKey, legacyStorageKeys, defaultPreset]);
 
   const semantic = useMemo(() => buildSemantic(brand), [buildSemantic, brand]);
   const layers = useMemo(

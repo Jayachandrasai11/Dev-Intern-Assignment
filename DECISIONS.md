@@ -1,221 +1,302 @@
-ISSUE #1 — GRAY TINT DOES NOTHING
+# DECISIONS.md
 
-Status:
+## Issue #1 — Gray Tint Does Nothing
+
+### Status
+
 Implemented and validated.
 
-Problem:
-Changing the Gray Tint control in the playground did not produce visibly
-different gray palettes.
+### Problem
 
-Affected options:
-- gray
-- mauve
-- slate
-- sage
-- olive
-- sand
+Changing the Gray Tint in the playground did not produce visibly different gray palettes for gray, mauve, slate, sage, olive, and sand.
 
-Expected behavior:
-Each Gray Tint option should produce its corresponding gray palette in both
-light and dark modes.
+### Root Cause
 
-ROOT CAUSE:
+Two issues were found in the rendering path.
 
-Issue #1 had two independent causes. Both were required to be fixed for the
-reported playground behavior to work correctly.
+First, the gray seeds were being passed through the generic `getScaleFromColor()` algorithm. Since gray colors have very low chroma, the generated ramps became almost neutral, making the differences between the six tints difficult to see.
 
-CAUSE 1 — GRAY GENERATION COLLAPSED THE TINT
+Second, the generated semantic gray tokens were being overwritten during CSS token emission. The layer order in `ThemeProvider.tsx` was:
 
-File:
-src/tokens/radixColors.ts
+`[semantic, globalTokens, ...extraLayers]`
 
-The selected gray tint was reduced to a single seed color and passed through
-the generic getScaleFromColor() algorithm.
+Because `globalTokens` came after `semantic`, the global gray values replaced the generated semantic gray values.
 
-That algorithm is appropriate for generated accent palettes, but gray seeds
-have very low chroma. The algorithm normalizes the generated scale toward the
-seed chroma, causing the hue differences between the six gray tints to
-collapse into nearly neutral colors.
+### Fix
 
-The repository already contains precomputed Radix gray ramps for:
+The gray generation path was updated to use the existing precomputed Radix gray ramps for the selected tint.
 
-- gray
-- mauve
-- slate
-- sage
-- olive
-- sand
+`brand.ts` now passes `brand.grayTint` to the light and dark gray generation.
 
-These ramps contain the intended Radix gray tint values, but the gray
-generation path was not using them directly.
+The gray ramp is cloned before use so the original Radix color data is not modified.
 
-FIX FOR CAUSE 1:
+The accent generation path and `getScaleFromColor()` were left unchanged.
 
-generateRadixColors() now accepts the grayTint value.
+The token emission order in `ThemeProvider.tsx` was also changed to:
 
-When grayTint is supplied, the generator selects the corresponding
-precomputed lightGrayColors or darkGrayColors ramp and clones it before use.
+`[globalTokens, semantic, ...extraLayers]`
 
-getScaleFromColor() remains unchanged and continues to be used for accent
-generation.
+This allows the generated semantic gray tokens to take precedence over the global gray tokens.
 
-src/tokens/brand.ts passes brand.grayTint into both the light and dark
-generateRadixColors() calls.
+### Regression Test
 
-CAUSE 2 — SEMANTIC GRAYS WERE BEING OVERWRITTEN DURING EMISSION
+Added a test that checks all six gray tints in both light and dark modes against the corresponding Radix P3 gray ramps.
 
-File:
-src/theme/ThemeProvider.tsx
+### Validation
 
-The emitted theme layers were previously ordered as:
+- All six gray tint options generate different gray values.
+- Light and dark gray ramps use the correct Radix values.
+- Gray alpha values remain valid.
+- Wide-gamut values remain valid.
+- Accent generation is unchanged.
+- Monochrome fallback remains valid.
+- Playground CSS variables update when the gray tint changes.
 
-[semantic, globalTokens, ...extraLayers]
+In light mode, the difference is more subtle because the main surfaces are intentionally close to white. The tint can still be seen in gray-dependent elements such as borders, dividers, and secondary text.
 
-The global layer contains the fixed/global gray scale. Because globalTokens
-came after semantic, its gray tokens overwrote the brand-generated semantic
-gray tokens during emission.
+### Test Status
 
-Therefore, even after Cause 1 was fixed and the semantic gray values became
-different for each tint, the browser could still receive the global gray
-values.
+277/279 tests passed in the full run.
 
-Evidence:
-The DOM/CSS variables remained constant before the layer-order correction,
-showing that the generated semantic gray values were being overwritten during
-emission.
+The two remaining failures were environment-dependent Vitest timeouts in the Volt package tests. The same failures were reproduced on the pristine baseline, so they were not caused by this change.
 
-FIX FOR CAUSE 2:
+No tests were weakened and no timeout values were changed.
 
-The layer order was changed to:
+### Files Changed
 
-[globalTokens, semantic, ...extraLayers]
+- `src/tokens/radixColors.ts`
+- `src/tokens/brand.ts`
+- `src/tokens/brand.test.ts`
+- `src/theme/ThemeProvider.tsx`
 
-This allows the brand-generated semantic gray tokens to take precedence over
-the colliding global gray tokens.
+---
 
-This is a one-line precedence correction and does not restructure the
-theming layer.
+## Issue #2 — Station Cards Lost Their Selected State
 
-IMPLEMENTATION:
+### Status
 
-src/tokens/radixColors.ts
-- Added GrayTint support.
-- Uses the existing Radix gray ramps for the selected tint.
-- Clones the selected ramp before use.
-- Keeps getScaleFromColor() unchanged for accent generation.
-- Preserves the existing fallback path when grayTint is not supplied.
+Implemented and validated.
 
-src/tokens/brand.ts
-- Passes brand.grayTint to both light and dark color generation.
-- Retains the existing GRAY_SEED mapping for fallback compatibility.
+### Problem
 
-src/tokens/brand.test.ts
-- Added regression coverage for all six gray tints.
-- Verifies light and dark gray.6 values against the corresponding Radix P3
-  source values.
+The `selected` variant of `StationListCard` looked the same as the default variant.
 
-src/theme/ThemeProvider.tsx
-- Corrected semantic/global emission precedence so generated semantic gray
-  tokens are not overwritten by global gray tokens.
+The expected behavior was for the selected card to have a visible ring and appear slightly raised.
 
-GRAY TINT COVERAGE:
+### Root Cause
 
-All six supported gray tints are covered:
+The `StationListCard` component was correctly adding the selected CSS class:
 
-- gray
-- mauve
-- slate
-- sage
-- olive
-- sand
+`ev-station-card--selected`
 
-Both light and dark modes are covered.
+The problem was in the CSS for that class.
 
-REGRESSION TEST:
+The CSS referenced:
 
-Test:
-each gray tint maps to the corresponding Radix P3 ramp
+`--ev-card-selected-boder`
 
-The test verifies:
+The variable name was misspelled because `border` was missing the letter `r`.
 
-- all six gray tints
-- light mode
-- dark mode
-- gray.6
-- corresponding Radix P3 source values
+The actual token was correctly defined as:
 
-The expected values come from @radix-ui/colors rather than hardcoded hex
-values.
+`--ev-card-selected-border`
 
-ADDITIONAL VALIDATION:
+Because the CSS referenced a variable that did not exist, the selected ring was not applied.
 
-Confirmed that:
+### Fix
 
-- gray alpha tokens remain generated
-- wide-gamut gray values remain valid
-- monochrome-accent fallback remains valid
-- accent generation remains unchanged
-- the six gray tints produce distinct CSS variable values in the playground
+Fixed the typo in:
 
-LIGHT MODE:
+`src/components/molecules/molecules.css`
 
-The gray variables do change correctly in light mode.
+Changed:
 
-However, the largest light-mode surfaces, such as the page background and
-some panel values, are intentionally hard-coded near white. Therefore the
-visual difference between Radix gray tints is more subtle in light mode.
+`--ev-card-selected-boder`
 
-The tint differences are more noticeable in consumers such as borders,
-secondary text, dividers, chips, and similar UI elements.
+to:
 
-This was investigated and is not considered a separate Issue #1 defect.
+`--ev-card-selected-border`
 
-TEST RESULT:
+No component logic or token definitions needed to be changed.
 
-The full test run was affected by environment-dependent Vitest timeouts.
+### Validation
 
-The chronic failures were:
+- All 279 tests passed.
+- All 16 test files passed.
+- Production build passed.
+- The selected StationListCard now shows the expected ring.
+- The selected card also has the expected elevated appearance.
+- Default and compact variants remain unchanged.
 
-- manifest › volt › loads & satisfies
-- css-contract › volt › every --ev-* emitted
+### Files Changed
 
-These tests dynamically load the Volt package and exceeded the local Vitest
-5-second test limit.
+- `src/components/molecules/molecules.css`
 
-The failures were reproduced on the pristine baseline and therefore are not
-caused by the Issue #1 changes.
+---
 
-Two additional tests:
+## Issue #3 — Exported JSX Will Not Compile
 
-- manifest › volt › codegen emitters
-- css-contract › volt › raw color scales
+### Status
 
-also timed out during one heavily loaded full run, but passed during an
-isolated rerun.
+Implemented and validated.
 
-No test assertions were weakened and no timeout values were changed.
+### Problem
 
-DECISION:
+The JSX generated by the Station Detail screen using **Copy JSX** could not be compiled when pasted into another application.
 
-Keep the ThemeProvider.tsx change.
+The generated code could contain fixtures from different source modules, but the code generator incorrectly imported them all from the same module.
 
-Although the gray-generation fix is in the token layer, the reported issue
-is a playground rendering issue. Correct token generation alone is
-insufficient when the generated semantic gray tokens are subsequently
-overwritten during emission.
+For example:
 
-The ThemeProvider change fixes the second part of the actual rendering
-defect.
+- `SAMPLE_PRICE_BANDS` comes from `../components/data`
+- `SAMPLE_TARIFF_NOTES` comes from `../components/tariffs`
 
-Reverting it would allow the global gray tokens to overwrite the correctly
-generated semantic gray tokens and would leave Issue #1 reproducible in the
-playground.
+The generated JSX incorrectly grouped both imports under:
 
-Therefore the final Issue #1 implementation fixes both:
+`../components/data`
 
-1. Gray tint generation.
-2. Semantic/global emission precedence.
+This caused a module resolution or TypeScript import error.
 
-No unrelated theming-layer restructuring was performed.
+### Root Cause
 
+The issue was in:
 
+`src/composer/codegen.ts`
+
+The code generator collected the fixture names but used the source module of the first fixture when generating the imports.
+
+This meant that fixtures coming from different modules were treated as if they all came from the same module.
+
+### Fix
+
+Updated the JSX code generation logic so that each fixture is resolved using its own source module.
+
+Fixtures from the same module can still be grouped into one import, while fixtures from different modules are kept in separate imports.
+
+This keeps the generated JSX imports consistent with the actual fixture definitions.
+
+### Regression Test
+
+Added a multi-fixture regression test that uses fixtures from different source modules.
+
+The test verifies that:
+
+- `SAMPLE_PRICE_BANDS` is imported from `../components/data`
+- `SAMPLE_TARIFF_NOTES` is imported from `../components/tariffs`
+- the two fixtures are not incorrectly combined into a single import
+
+### Validation
+
+- Multi-fixture regression test passes.
+- Full test suite passes.
+- Generated JSX uses the correct fixture source modules.
+- Existing code generation behavior remains intact.
+
+### Files Changed
+
+- `src/composer/codegen.ts`
+- `src/composer/codegen.test.ts`
+- `src/composer/codegen-multi-fixture.test.ts`
+
+---
+
+## Issue #4 — Theme Settings Leak Across UI Libraries
+
+### Status
+
+Implemented and validated.
+
+### Problem
+
+Theme customizations from one UI library could appear when switching to another library.
+
+For example:
+
+- Customize the Volt theme.
+- Switch to Atlas Web.
+- Atlas Web could continue showing the Volt theme settings.
+
+The expected behavior is that every UI library has its own theme state.
+
+Volt, Atlas Web, and Atlas Charge should each use their own default theme when no customization has been saved.
+
+If a library has already been customized, switching back to that library should restore its own saved customization.
+
+### Root Cause
+
+The theme is stored in `localStorage` using a different key for each library.
+
+For example:
+
+- `prism-ui-theme:volt`
+- `prism-ui-theme:atlas-web`
+- `prism-ui-theme:atlas-charge`
+
+The parent components were already passing the correct library-specific `storageKey`.
+
+The problem was that `ThemeProvider` initializes its theme state using React's `useState`.
+
+When the active library changed, `ThemeProvider` could be re-rendered with a different `storageKey` without being re-mounted.
+
+Because the `useState` initializer only runs when the component is mounted, the existing theme state could remain from the previous library.
+
+As a result, the new library could temporarily continue using the previous library's theme state instead of loading its own persisted theme or default preset.
+
+### Fix
+
+Updated `ThemeProvider.tsx` so that it reacts when the `storageKey`, legacy storage keys, or default preset changes.
+
+A `useEffect` now reloads the persisted theme using the new library's storage key and updates the theme state.
+
+This ensures that changing the active library also changes the theme state being used by `ThemeProvider`.
+
+The existing per-library storage keys remain in place.
+
+### Regression Test
+
+Added `ThemeProvider.test.tsx` with tests covering theme persistence and isolation.
+
+The tests verify that:
+
+- A persisted theme is loaded from the correct storage key.
+- Different libraries can have different persisted themes.
+- A missing persisted theme falls back to that library's default preset.
+- Legacy storage keys are still supported.
+- Corrupted persisted data falls back correctly.
+- Theme state does not leak between different library storage keys.
+
+### Validation
+
+- All new Issue #4 tests pass.
+- Full test suite passes apart from the previously known environment-dependent timeout failures.
+- Production build passes.
+- Volt can retain its own customization.
+- Atlas Web uses its own theme.
+- Atlas Charge uses its own theme.
+- Switching back to a previously customized library restores that library's saved theme.
+- The same behavior works in the composer.
+
+### Files Changed
+
+- `src/theme/ThemeProvider.tsx`
+- `src/theme/ThemeProvider.test.tsx`
+
+---
+
+# Final Summary
+
+All four reported issues were investigated and addressed with focused changes.
+
+### Issue #1
+Fixed gray tint generation and token emission order.
+
+### Issue #2
+Fixed the misspelled selected-card CSS variable.
+
+### Issue #3
+Fixed fixture imports in generated JSX so fixtures are imported from their correct source modules.
+
+### Issue #4
+Fixed theme state reloading when switching between UI libraries.
+
+No unrelated redesign or refactoring was introduced.
