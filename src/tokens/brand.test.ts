@@ -1,11 +1,16 @@
 import { describe, expect, it } from 'vitest';
+import * as RadixColorsModule from '@radix-ui/colors';
+import Color from 'colorjs.io';
 import { VOLT_STATUS_TOKENS } from '../libraries/volt/tokens/status';
 import {
   buildSemanticTokens,
   isValidHex,
   RADIUS_FACTORS,
+  type GrayTint,
 } from './brand';
 import type { BrandDefinition } from './brand';
+
+const RadixColors = RadixColorsModule as unknown as Record<string, Record<string, string>>;
 
 const VOLT: BrandDefinition = {
   name: 'Volt',
@@ -24,6 +29,10 @@ function tokenMap(brand: BrandDefinition) {
       t,
     ]),
   );
+}
+
+function p3ToHex(p3Color: string): string {
+  return new Color(p3Color).to("srgb").toString({ format: "hex" }).toLowerCase();
 }
 
 describe('buildSemanticTokens', () => {
@@ -114,6 +123,20 @@ describe('buildSemanticTokens', () => {
   it('keeps the core library-agnostic: no status slots without extraTokens', () => {
     const core = buildSemanticTokens(VOLT);
     expect(core.tokens.some((t) => t.path.startsWith('status.'))).toBe(false);
+  });
+
+  it('each gray tint maps to the corresponding Radix P3 ramp', () => {
+    const tints: GrayTint[] = ['gray', 'mauve', 'slate', 'sage', 'olive', 'sand'];
+    for (const tint of tints) {
+      const expected = {
+        light: p3ToHex(RadixColors[`${tint}P3`][`${tint}6`]),
+        dark: p3ToHex(RadixColors[`${tint}DarkP3`][`${tint}6`]),
+      };
+      const tokens = tokenMap({ ...VOLT, grayTint: tint });
+      const g6 = tokens.get('gray.6')!;
+      expect(g6.modes!.light).toBe(expected.light);
+      expect(g6.modes!.dark).toBe(expected.dark);
+    }
   });
 
   // The shared shell CSS (base/playground/themepanel/board) and TokensView

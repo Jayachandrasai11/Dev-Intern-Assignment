@@ -206,4 +206,26 @@ export function QuickActionsScreen() {
     };
     expect(puckDataToJsxVolt(data, 'Bare')).not.toContain('Page');
   });
+
+  it('imports fixtures from their correct source modules', () => {
+    const data: Data = {
+      content: [
+        { type: 'PricingTable', props: { showMember: true, idleFeePerMin: 0.4, notes: true } },
+      ],
+      root: { props: {} },
+    };
+    const jsx = puckDataToJsxVolt(data, 'Station detail');
+    // SAMPLE_PRICE_BANDS comes from '../components/data'
+    expect(jsx).toContain(
+      "import { SAMPLE_PRICE_BANDS } from '../components/data';"
+    );
+    // SAMPLE_TARIFF_NOTES comes from '../components/tariffs'
+    expect(jsx).toContain(
+      "import { SAMPLE_TARIFF_NOTES } from '../components/tariffs';"
+    );
+    // They must NOT be imported from the same module
+    expect(jsx).not.toContain(
+      "import { SAMPLE_PRICE_BANDS, SAMPLE_TARIFF_NOTES } from '../components/data';"
+    );
+  });
 });
